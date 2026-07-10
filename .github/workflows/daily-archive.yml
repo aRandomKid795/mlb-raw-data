@@ -1,0 +1,39 @@
+name: Daily MLB Archive
+
+on:
+  schedule:
+    # Runs at 9:00 UTC (~2-5am US time depending on season/timezone),
+    # after most MLB games have finished. Adjust as needed.
+    - cron: "0 9 * * *"
+  workflow_dispatch:
+    inputs:
+      date:
+        description: "Target date (YYYY-MM-DD). Leave blank for today."
+        required: false
+
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - run: pip install -r requirements.txt
+
+      - name: Run archiver
+        env:
+          TARGET_DATE: ${{ github.event.inputs.date }}
+        run: python archive.py
+
+      - name: Commit and push results
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add boxscores/
+          git commit -m "Archive boxscores $(date -u +%F)" || echo "No changes to commit"
+          git push

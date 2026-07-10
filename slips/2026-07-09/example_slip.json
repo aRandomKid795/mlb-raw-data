@@ -1,0 +1,12 @@
+{
+  "slip_id": "example_001",
+  "date": "2026-07-09",
+  "entry_fee": 5,
+  "payout_type": "power",
+  "picks": [
+    {"player": "Jose Ramirez", "stat": "total_bases", "line": 1.5, "side": "over"},
+    {"player": "Aaron Judge", "stat": "hits", "line": 1.5, "side": "over"},
+    {"player": "Shohei Ohtani", "stat": "hits_runs_rbis", "line": 2.5, "side": "over"}
+  ],
+  "result": "pending"
+}
