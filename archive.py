@@ -3,14 +3,14 @@ Pulls MLB boxscore stats for a given date and writes them to
 boxscores/YYYY-MM-DD/mlb.json
 
 Usage:
-    python archive.py                  # defaults to today (UTC)
+    python archive.py                  # defaults to YESTERDAY (UTC)
     TARGET_DATE=2026-07-08 python archive.py
 """
 
 import json
 import os
 import time
-from datetime import date, timezone, datetime
+from datetime import date, timezone, datetime, timedelta
 
 import requests
 
@@ -42,6 +42,7 @@ def build_lookup(target_date: str, sleep_between: float = 0.3):
 
         for side in ("home", "away"):
             team = box.get("teams", {}).get(side, {})
+            team_abbr = team.get("team", {}).get("abbreviation")
             for player in team.get("players", {}).values():
                 batting = player.get("stats", {}).get("batting", {})
                 if not batting:
@@ -49,6 +50,7 @@ def build_lookup(target_date: str, sleep_between: float = 0.3):
                 name = player["person"]["fullName"]
                 lookup[normalize(name)] = {
                     "display_name": name,
+                    "team": team_abbr,
                     "ab": batting.get("atBats", 0),
                     "pa": batting.get("plateAppearances", 0),
                     "h": batting.get("hits", 0),
@@ -82,6 +84,8 @@ def archive_day(target_date: str, out_root: str = "boxscores"):
 
 
 if __name__ == "__main__":
-    target = os.environ.get("TARGET_DATE") or datetime.now(timezone.utc).date().isoformat()
+    target = os.environ.get("TARGET_DATE") or (
+        datetime.now(timezone.utc).date() - timedelta(days=1)
+    ).isoformat()
     print(f"Archiving MLB boxscores for {target}...")
     archive_day(target)
